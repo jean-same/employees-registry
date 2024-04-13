@@ -1,0 +1,52 @@
+# Read the documentation: https://fosrestbundle.readthedocs.io/en/3.x/
+fos_rest:
+  routing_loader: false
+  view:
+    view_response_listener: "force"
+    formats:
+      json: true
+      xml: true
+  zone:
+    - { path: "^/api" }
+  format_listener:
+    rules:
+      - {
+          path: "^/api/",
+          priorities: ["json"],
+          fallback_format: "json",
+          prefer_extension: false,
+        }
+  body_listener:
+    enabled: true
+  param_fetcher_listener:
+    enabled: true
+  serializer:
+    serialize_null: true
+
+  # Convert exception to Api Response
+  exception:
+    enabled: true
+
+    # Display exception messages on production (if not set, the message will be "Server error")
+    messages:
+      'Symfony\Component\HttpKernel\Exception\HttpException': true
+      'Symfony\Component\Security\Core\Exception\BadCredentialsException': true
+      'Symfony\Component\HttpKernel\Exception\NotFoundHttpException': true
+      'Symfony\Component\Security\Core\Exception\AccessDeniedException': true
+      'Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException': true
+      'Symfony\Component\HttpKernel\Exception\LockedHttpException': true
+      "InvalidArgumentException": true
+      "ErrorException": true
+
+    # Set HttpCode return by Api for exception
+    codes:
+      # 'Symfony\Component\Form\Exception\InvalidArgumentException': 403
+      'Symfony\Component\HttpKernel\Exception\NotFoundHttpException': 404
+      'Symfony\Component\Security\Core\Exception\BadCredentialsException': 401
+      'Symfony\Component\Security\Core\Exception\RuntimeException': 500
+      'Symfony\Component\Security\Core\Exception\AccessDeniedException': 403
+      'Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException': 406
+      'Symfony\Component\HttpKernel\Exception\LockedHttpException': 423
+      "InvalidArgumentException": 400
+      "ErrorException": 403
+      "Exception": 500

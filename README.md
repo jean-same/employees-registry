@@ -1,1 +1,1 @@
-# employees-registry
+# employee-registry
