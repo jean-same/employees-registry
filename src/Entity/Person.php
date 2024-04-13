@@ -2,11 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\PersonRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use ErrorException;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\PersonRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PersonRepository::class)]
 class Person
@@ -14,15 +17,24 @@ class Person
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['person:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 128)]
+    #[Assert\Length(min: 2, max: 254)]
+    #[Assert\NotNull(message: "The first name can not be null.")]
+    #[Groups(['person:read', 'person:write'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 128)]
+    #[Assert\Length(min: 2, max: 254)]
+    #[Assert\NotNull(message: "The last name can not be null.")]
+    #[Groups(['person:read', 'person:write'])]
     private ?string $lastName = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[Assert\NotNull(message: "The date of birth can not be null.")]
+    #[Groups(['person:read', 'person:write'])]
     private ?\DateTimeImmutable $dateOfBirth = null;
 
     #[ORM\ManyToMany(targetEntity: Employment::class, inversedBy: 'people')]
@@ -69,8 +81,15 @@ class Person
 
     public function setDateOfBirth(\DateTimeImmutable $dateOfBirth): static
     {
-        $this->dateOfBirth = $dateOfBirth;
 
+        $now = new \DateTimeImmutable();
+        $age = $now->diff($dateOfBirth)->y;
+
+        if ($age >= 150) {
+            throw new ErrorException('The person must be under 150 years old.');
+        }
+
+        $this->dateOfBirth = $dateOfBirth;
         return $this;
     }
 
