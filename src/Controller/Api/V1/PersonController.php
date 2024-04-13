@@ -30,7 +30,7 @@ class PersonController extends AbstractFOSRestController
     #[Rest\View(serializerGroups: ['person:read'])]
     public function browse(): View
     {
-        $personsWithTheirCurrentEmployment = $this->personRepository->findAllPeopleWithCurrentEmployment();
+        $personsWithTheirCurrentEmployment = $this->personRepository->findAllPersonWithCurrentEmployment();
 
         return $this->view([
             'message' => 'Ok',
@@ -68,6 +68,18 @@ class PersonController extends AbstractFOSRestController
         return $this->view([
             'message' => 'Employment added successfully',
             'data' => $person
+        ], Response::HTTP_OK);
+    }
+
+    #[Rest\Get('/{companyName}', name: 'by_company')]
+    #[Rest\View(serializerGroups :[ "person:write" ])]
+    public function personByCompany(string $companyName): View
+    {
+        $people = $this->personRepository->findPersonByCompanyName(strtoupper($companyName));
+
+        return $this->view([
+            'message' => 'Ok',
+            'data' => $people
         ], Response::HTTP_OK);
     }
 }

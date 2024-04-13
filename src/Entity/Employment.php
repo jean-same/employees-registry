@@ -46,6 +46,7 @@ class Employment
     #[ORM\Column(length: 255)]
     #[Assert\Length(min: 2, max: 254)]
     #[Assert\NotNull(message: "The company name can not be null.")]
+    #[Groups(['person:read', 'person:write'])]
     private ?string $companyName = null;
 
     #[ORM\Column]
@@ -132,7 +133,7 @@ class Employment
 
     public function setCompanyName(string $companyName): static
     {
-        $this->companyName = $companyName;
+        $this->companyName = strtoupper($companyName);
 
         return $this;
     }

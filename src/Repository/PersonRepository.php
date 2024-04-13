@@ -21,7 +21,7 @@ class PersonRepository extends ServiceEntityRepository
         parent::__construct($registry, Person::class);
     }
 
-    public function findAllPeopleWithCurrentEmployment(): array
+    public function findAllPersonWithCurrentEmployment(): array
     {
         $query = $this->_em->createQuery('
             SELECT p, e
@@ -29,6 +29,20 @@ class PersonRepository extends ServiceEntityRepository
                 LEFT JOIN p.employment e WITH e.isCurrent = true
                 ORDER BY p.lastName, p.firstName
         ');
+
+        return $query->getResult();
+    }
+
+    public function findPersonByCompanyName(string $companyName): array
+    {
+        $query = $this->_em->createQuery('
+            SELECT p, e
+            FROM App\Entity\Person p
+            JOIN p.employment e
+            WHERE e.companyName = :companyName
+            ORDER BY p.lastName, p.firstName
+        ');
+        $query->setParameter('companyName', $companyName);
 
         return $query->getResult();
     }
