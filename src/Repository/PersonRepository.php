@@ -21,6 +21,18 @@ class PersonRepository extends ServiceEntityRepository
         parent::__construct($registry, Person::class);
     }
 
+    public function findAllPeopleWithCurrentEmployment(): array
+    {
+        $query = $this->_em->createQuery('
+            SELECT p, e
+                FROM App\Entity\Person p
+                LEFT JOIN p.employment e WITH e.isCurrent = true
+                ORDER BY p.lastName, p.firstName
+        ');
+
+        return $query->getResult();
+    }
+
 //    /**
 //     * @return Person[] Returns an array of Person objects
 //     */

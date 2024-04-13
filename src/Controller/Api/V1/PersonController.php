@@ -26,6 +26,18 @@ class PersonController extends AbstractFOSRestController
         private PersonRepository $personRepository
     ) { }
 
+    #[Rest\Get('', name: 'browse')]
+    #[Rest\View(serializerGroups: ['person:read'])]
+    public function browse(): View
+    {
+        $personsWithTheirCurrentEmployment = $this->personRepository->findAllPeopleWithCurrentEmployment();
+
+        return $this->view([
+            'message' => 'Ok',
+            'data' => $personsWithTheirCurrentEmployment
+        ], Response::HTTP_OK);
+    }
+
     #[Rest\Post('', name: 'add')]
     #[Rest\View(serializerGroups :[ "person:write" ])]
     public function add(Request $request): View

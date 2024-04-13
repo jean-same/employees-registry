@@ -37,6 +37,9 @@ class Person
     #[Groups(['person:read', 'person:write'])]
     private ?\DateTimeImmutable $dateOfBirth = null;
 
+    #[Groups(['person:read'])]
+    private ?int $age = null;
+
     #[ORM\ManyToMany(targetEntity: Employment::class, inversedBy: 'people')]
     #[Groups(['person:read', 'person:write'])]
     private Collection $employment;
@@ -92,6 +95,19 @@ class Person
 
         $this->dateOfBirth = $dateOfBirth;
         return $this;
+    }
+
+    public function getAge(): ?int
+    {
+        $dateOfBirth = $this->getDateOfBirth();
+        if (!$dateOfBirth) {
+            return null;
+        }
+
+        $currentDate = new \DateTime();
+        $this->age = $dateOfBirth->diff($currentDate)->y;
+        
+        return $this->age;
     }
 
     /**

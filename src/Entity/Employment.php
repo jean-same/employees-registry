@@ -49,6 +49,7 @@ class Employment
     private ?string $companyName = null;
 
     #[ORM\Column]
+    #[Groups(['person:read', 'person:write'])]
     private ?bool $isCurrent = false;
 
     public function __construct()
