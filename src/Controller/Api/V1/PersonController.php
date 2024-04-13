@@ -10,10 +10,12 @@ use App\Repository\PersonRepository;
 use App\Service\SerializationService;
 use App\Service\EntityValidatorService;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 #[Rest\Route('/v1/persons', name: 'api_v1_person_')]
@@ -23,7 +25,7 @@ class PersonController extends AbstractFOSRestController
         private SerializationService $serializationService,
         private EntityManagerInterface $em,
         private EntityValidatorService $entityValidatorService,
-        private PersonRepository $personRepository
+        private PersonRepository $personRepository,
     ) { }
 
     #[Rest\Get('', name: 'browse')]
@@ -80,6 +82,25 @@ class PersonController extends AbstractFOSRestController
         return $this->view([
             'message' => 'Ok',
             'data' => $people
+        ], Response::HTTP_OK);
+    }
+
+    #[Rest\Get('/{id}/employments', name: 'employments')]
+    #[Rest\View(serializerGroups :[ "person:read" ])]
+    public function personEmploymentsDateRange(Request $request, Person $person): View
+    {
+        $startDate = new \DateTimeImmutable($request->query->get('startDate'));
+        $endDate = new \DateTimeImmutable($request->query->get('endDate')); 
+
+        if ($startDate > $endDate) {
+            throw new BadRequestException('The start date must be before the end date.');
+        }
+
+        $employments = $this->personRepository->findEmploymentsByPersonAndDateRange($person, $startDate, $endDate);
+
+        return $this->view([
+            'message' => 'Ok',
+            'data' => $employments
         ], Response::HTTP_OK);
     }
 }

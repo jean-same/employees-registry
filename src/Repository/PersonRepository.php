@@ -47,6 +47,23 @@ class PersonRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
+    public function findEmploymentsByPersonAndDateRange(Person $person, \DateTimeImmutable $startDate, $endDate = null): array
+    {
+        $query = $this->_em->createQuery('
+            SELECT e
+            FROM App\Entity\Employment e
+            JOIN e.people p
+            WHERE p = :person
+            AND e.startDate >= :startDate
+            AND (e.endDate <= :endDate OR e.endDate IS NULL)
+        ');
+        $query->setParameter('person', $person);
+        $query->setParameter('startDate', $startDate);
+        $query->setParameter('endDate', $endDate);
+
+        return $query->getResult();
+    }
+
 //    /**
 //     * @return Person[] Returns an array of Person objects
 //     */
