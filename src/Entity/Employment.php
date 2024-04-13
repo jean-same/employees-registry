@@ -152,8 +152,10 @@ class Employment
 
     public function validateForAdd(): void
     {
-        if ($this->isCurrent() && $this->getEndDate() === null) {
-            throw new NotFoundHttpException('The end date is required for current employment');
+        if (!$this->isCurrent() && $this->getEndDate() === null) {
+            throw new NotFoundHttpException('The end date is required for past employment');
+        } elseif($this->isCurrent()) {
+            $this->setEndDate(null);
         }
     }
 }
