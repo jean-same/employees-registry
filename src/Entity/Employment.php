@@ -2,11 +2,15 @@
 
 namespace App\Entity;
 
-use App\Repository\EmploymentRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use ErrorException;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\EmploymentRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 #[ORM\Entity(repositoryClass: EmploymentRepository::class)]
 class Employment
@@ -14,22 +18,38 @@ class Employment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['person:read', 'person:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\Length(min: 2, max: 254)]
+    #[Assert\NotNull(message: "The position can not be null.")]
+    #[Groups(['person:read', 'person:write'])]
     private ?string $position = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[Assert\NotNull(message: "The start date can not be null.")]
+    #[Groups(['person:read', 'person:write'])]
     private ?\DateTimeImmutable $startDate = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
+    #[Assert\Expression(
+        "value === null || value >= this.getStartDate()",
+        message: "End date cannot be less than the start date."
+    )]
     private ?\DateTimeImmutable $endDate = null;
 
     #[ORM\ManyToMany(targetEntity: Person::class, mappedBy: 'employment')]
     private Collection $people;
 
     #[ORM\Column(length: 255)]
+    #[Assert\Length(min: 2, max: 254)]
+    #[Assert\NotNull(message: "The company name can not be null.")]
     private ?string $companyName = null;
+
+    #[ORM\Column]
+    private ?bool $isCurrent = false;
 
     public function __construct()
     {
@@ -114,5 +134,24 @@ class Employment
         $this->companyName = $companyName;
 
         return $this;
+    }
+
+    public function isCurrent(): ?bool
+    {
+        return $this->isCurrent;
+    }
+
+    public function setIsCurrent(bool $isCurrent): static
+    {
+        $this->isCurrent = $isCurrent;
+
+        return $this;
+    }
+
+    public function validateForAdd(): void
+    {
+        if ($this->isCurrent() && $this->getEndDate() === null) {
+            throw new NotFoundHttpException('The end date is required for current employment');
+        }
     }
 }

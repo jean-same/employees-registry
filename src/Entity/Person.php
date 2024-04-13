@@ -38,6 +38,7 @@ class Person
     private ?\DateTimeImmutable $dateOfBirth = null;
 
     #[ORM\ManyToMany(targetEntity: Employment::class, inversedBy: 'people')]
+    #[Groups(['person:read', 'person:write'])]
     private Collection $employment;
 
     public function __construct()
