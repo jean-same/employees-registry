@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use ErrorException;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\PersonRepository;
@@ -10,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 #[ORM\Entity(repositoryClass: PersonRepository::class)]
 class Person
@@ -90,8 +90,12 @@ class Person
         $age = $now->diff($dateOfBirth)->y;
 
         if ($age >= 150) {
-            throw new ErrorException('The person must be under 150 years old.');
+            throw new UnprocessableEntityHttpException('The person must be under 150 years old.');
         }
+
+        if ($dateOfBirth > $now) {
+            throw new UnprocessableEntityHttpException('The date of birth cannot be in the future.');
+        }    
 
         $this->dateOfBirth = $dateOfBirth;
         return $this;

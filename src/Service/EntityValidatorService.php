@@ -20,6 +20,14 @@ class EntityValidatorService
     {
     }
 
+    /**
+     * Validates an entity object against the defined constraints.
+     *
+     * @param object $value The entity object to validate.
+     * @param mixed $constraints (Optional) The constraints to apply for validation.
+     * @param mixed $groups (Optional) The validation groups to use.
+     * @return array|false An array of validation errors if any, otherwise false.
+     */
     private function validate($value, $constraints = null, $groups = null)
     {
         $violations = $this->validator->validate($value, $constraints, $groups);
@@ -39,6 +47,15 @@ class EntityValidatorService
         return false;
     }
 
+    /**
+     * Validates and persists an entity object.
+     *
+     * @param object $entityToValidate The entity object to validate and persist.
+     * @param bool $update (Optional) Indicates if the operation is an update.
+     * @return void
+     * @throws UnprocessableEntityHttpException When validation fails.
+     * @throws Exception When an error occurs during the persistence process.
+     */
     public function validateAndPersistEntity(object $entityToValidate, bool $update = false): void
     {
         $violations = $this->validate($entityToValidate);
