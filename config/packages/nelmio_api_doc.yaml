@@ -1,15 +1,10 @@
 nelmio_api_doc:
   documentation:
     info:
-      title: Api template
+      title: Employees registry API
       description: This is an awesome app!
       version: 1.0.0
     components:
-      securitySchemes:
-        Bearer:
-          type: http
-          scheme: bearer
-          bearerFormat: JWT
       schemas:
         error:
           type: object
@@ -31,50 +26,6 @@ nelmio_api_doc:
             application/json:
               schema:
                 allOf: [$ref: "#/components/schemas/error"]
-        UnauthorizedError:
-          description: Bad credentials
-          content:
-            application/json:
-              schema:
-                allOf: [$ref: "#/components/schemas/error"]
-        JwtTokenInvalid:
-          description: "JWT Token invalid, expired or not found"
-          content:
-            application/json:
-              schema:
-                allOf: [$ref: "#/components/schemas/error"]
-    security:
-      - Bearer: []
-    paths:
-      /api/login_check:
-        post:
-          tags:
-            - Authentication
-          description: Login into the api, return a token.
-          parameters:
-            - in: query
-              name: user
-              description: Login
-              required: true
-              schema:
-                type: object
-                properties:
-                  username:
-                    type: string
-                  password:
-                    type: string
-          responses:
-            "200":
-              description: Login successful, return a token with 1 day duration.
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    properties:
-                      token:
-                        type: string
-            "401":
-              $ref: "#/components/responses/UnauthorizedError"
   areas: # to filter documented areas
     path_patterns:
       - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
